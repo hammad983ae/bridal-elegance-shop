@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { toast } from "sonner";
 import {
   storefrontApiRequest,
   type ShopifyMoney,
@@ -22,7 +23,7 @@ interface CartStore {
   checkoutUrl: string | null;
   isLoading: boolean;
   isSyncing: boolean;
-  addItem: (item: Omit<CartItem, "lineId">) => Promise<void>;
+  addItem: (item: Omit<CartItem, "lineId">) => Promise<boolean>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
   clearCart: () => void;
@@ -94,7 +95,14 @@ async function createShopifyCart(item: CartItem) {
     return null;
   }
   const cart = data?.data?.cartCreate?.cart;
-  if (!cart?.checkoutUrl) return null;
+  if (!cart) {
+    console.error("cartCreate returned no cart. Full response:", JSON.stringify(data));
+    return null;
+  }
+  if (!cart.checkoutUrl) {
+    console.error("cartCreate returned cart with no checkoutUrl:", JSON.stringify(cart));
+    return null;
+  }
   const lineId = cart.lines.edges[0]?.node?.id;
   if (!lineId) return null;
   return { cartId: cart.id as string, checkoutUrl: formatCheckoutUrl(cart.checkoutUrl), lineId: lineId as string };
@@ -157,10 +165,15 @@ export const useCartStore = create<CartStore>()(
                 checkoutUrl: result.checkoutUrl,
                 items: [{ ...item, lineId: result.lineId }],
               });
+              return true;
             }
+            toast.error("Could not add to bag", {
+              description: "Unable to create cart. Please check your Shopify store settings.",
+            });
+            return false;
           } else if (existingItem) {
             const newQuantity = existingItem.quantity + item.quantity;
-            if (!existingItem.lineId) return;
+            if (!existingItem.lineId) return false;
             const result = await updateShopifyCartLine(cartId, existingItem.lineId, newQuantity);
             if (result.success) {
               const currentItems = get().items;
@@ -169,16 +182,22 @@ export const useCartStore = create<CartStore>()(
                   i.variantId === item.variantId ? { ...i, quantity: newQuantity } : i,
                 ),
               });
+              return true;
             } else if (result.cartNotFound) clearCart();
+            return false;
           } else {
             const result = await addLineToShopifyCart(cartId, { ...item, lineId: null });
             if (result.success) {
               const currentItems = get().items;
               set({ items: [...currentItems, { ...item, lineId: result.lineId ?? null }] });
+              return true;
             } else if (result.cartNotFound) clearCart();
+            return false;
           }
         } catch (e) {
           console.error("Failed to add item:", e);
+          toast.error("Could not add to bag", { description: "An unexpected error occurred." });
+          return false;
         } finally {
           set({ isLoading: false });
         }

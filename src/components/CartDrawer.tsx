@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useCartStore } from "@/stores/cartStore";
 import { formatPrice } from "@/lib/shopify";
 
@@ -30,6 +31,10 @@ export function CartDrawer() {
     if (url) {
       window.open(url, "_blank");
       setOpen(false);
+    } else {
+      toast.error("Checkout unavailable", {
+        description: "Unable to retrieve checkout link. Please try removing and re-adding items.",
+      });
     }
   };
 

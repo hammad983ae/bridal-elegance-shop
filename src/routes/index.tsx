@@ -1,13 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { queryOptions } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { ArrowRight, Scissors, Truck, Sparkles } from "lucide-react";
-import { fetchProducts, type ShopifyProduct } from "@/lib/shopify";
+import { fetchProducts, fetchCollectionProducts, type ShopifyProduct } from "@/lib/shopify";
 import { ProductCard } from "@/components/ProductCard";
 
 const productsQuery = queryOptions({
   queryKey: ["home-products"],
   queryFn: () => fetchProducts(24),
+  staleTime: 60_000,
+});
+
+const newArrivalsQuery = queryOptions({
+  queryKey: ["collection", "new-arrivals"],
+  queryFn: () => fetchCollectionProducts("new-arrivals", 8),
   staleTime: 60_000,
 });
 
@@ -28,15 +36,105 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(productsQuery),
+      context.queryClient.ensureQueryData(newArrivalsQuery),
+    ]),
   component: HomePage,
 });
 
+const HERO_SLIDES = [
+  { url: "/hero/hero-1.jpg", alt: "Faiza Amjad bridal couture" },
+  { url: "/hero/hero-2.jpg", alt: "Faiza Amjad bridal couture" },
+  { url: "/hero/hero-3.jpg", alt: "Faiza Amjad bridal couture" },
+];
+
+function HeroCarousel() {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const interval = setInterval(() => emblaApi.scrollNext(), 5000);
+    return () => clearInterval(interval);
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
+    emblaApi.on("select", onSelect);
+    return () => { emblaApi.off("select", onSelect); };
+  }, [emblaApi]);
+
+  return (
+    <section className="relative min-h-[88vh] w-full overflow-hidden">
+      {/* Slides */}
+      <div ref={emblaRef} className="absolute inset-0">
+        <div className="flex h-full">
+          {HERO_SLIDES.map((slide, i) => (
+            <div key={i} className="relative min-w-full flex-shrink-0">
+              <img
+                src={slide.url}
+                alt={slide.alt}
+                className="h-full w-full object-cover object-center"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-background" />
+
+      {/* Content */}
+      <div className="relative mx-auto flex min-h-[88vh] max-w-7xl flex-col justify-end px-6 pb-24 pt-32">
+        <p className="eyebrow text-background/80">Autumn / Winter Edit — Now Shipping</p>
+        <h1 className="mt-4 max-w-3xl font-serif text-5xl font-medium leading-[1.05] text-background md:text-7xl">
+          Bridal couture,<br />
+          <em className="italic text-background/95">hand-embroidered to be worn forever.</em>
+        </h1>
+        <p className="mt-6 max-w-xl text-base leading-relaxed text-background/85">
+          An atelier of eastern bridal lehngas, wedding formals and everyday luxe — cut, embroidered
+          and finished by artisans in limited editions.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            to="/shop"
+            className="inline-flex h-12 items-center justify-center gap-2 bg-background px-8 text-[12px] uppercase tracking-[0.28em] text-primary transition hover:bg-background/90"
+          >
+            Shop the Edit <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            to="/shop"
+            search={{ collection: "Bridal Lehngas" }}
+            className="inline-flex h-12 items-center justify-center border border-background/70 px-8 text-[12px] uppercase tracking-[0.28em] text-background transition hover:bg-background/10"
+          >
+            Bridal Atelier
+          </Link>
+        </div>
+      </div>
+
+      {/* Dot indicators */}
+      <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2">
+        {HERO_SLIDES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => emblaApi?.scrollTo(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`h-[3px] transition-all duration-300 ${
+              i === selectedIndex ? "w-8 bg-background" : "w-4 bg-background/40"
+            }`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function HomePage() {
   const { data: products } = useSuspenseQuery(productsQuery);
+  const { data: newArrivals } = useSuspenseQuery(newArrivalsQuery);
   const featured = products.slice(0, 8);
-  const heroImage = products.find((p) => p.node.productType === "Bridal Lehngas")?.node.images.edges[0]?.node
-    ?? products[0]?.node.images.edges[0]?.node;
 
   const collections = [
     { name: "Bridal Lehngas", tagline: "Statement heirlooms" },
@@ -48,42 +146,7 @@ function HomePage() {
   return (
     <div>
       {/* HERO */}
-      <section className="relative min-h-[88vh] w-full overflow-hidden">
-        {heroImage && (
-          <img
-            src={heroImage.url}
-            alt={heroImage.altText ?? "Faiza Amjad bridal couture"}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-background" />
-        <div className="relative mx-auto flex min-h-[88vh] max-w-7xl flex-col justify-end px-6 pb-20 pt-32">
-          <p className="eyebrow text-background/80">Autumn / Winter Edit — Now Shipping</p>
-          <h1 className="mt-4 max-w-3xl font-serif text-5xl font-medium leading-[1.05] text-background md:text-7xl">
-            Bridal couture,<br />
-            <em className="italic text-background/95">hand-embroidered to be worn forever.</em>
-          </h1>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-background/85">
-            An atelier of eastern bridal lehngas, wedding formals and everyday luxe — cut, embroidered
-            and finished by artisans in limited editions.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              to="/shop"
-              className="inline-flex h-12 items-center justify-center gap-2 bg-background px-8 text-[12px] uppercase tracking-[0.28em] text-primary transition hover:bg-background/90"
-            >
-              Shop the Edit <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/shop"
-              search={{ collection: "Bridal Lehngas" }}
-              className="inline-flex h-12 items-center justify-center border border-background/70 px-8 text-[12px] uppercase tracking-[0.28em] text-background transition hover:bg-background/10"
-            >
-              Bridal Atelier
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HeroCarousel />
 
       {/* MARQUEE VALUE PROPS */}
       <section className="border-y border-border/60 bg-secondary/30">
@@ -103,6 +166,39 @@ function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* NEW ARRIVALS */}
+      {newArrivals.length > 0 && (
+        <section className="mx-auto max-w-7xl px-6 py-20">
+          <div className="mb-10 flex items-end justify-between">
+            <div>
+              <p className="eyebrow">Just landed</p>
+              <h2 className="mt-2 font-serif text-4xl md:text-5xl">New Arrivals</h2>
+            </div>
+            <Link
+              to="/shop"
+              search={{ collection: "New Arrivals" }}
+              className="hidden text-[12px] uppercase tracking-[0.25em] text-primary hover:underline md:inline-flex"
+            >
+              View all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
+            {newArrivals.map((p: ShopifyProduct) => (
+              <ProductCard key={p.node.id} product={p} />
+            ))}
+          </div>
+          <div className="mt-10 text-center md:hidden">
+            <Link
+              to="/shop"
+              search={{ collection: "New Arrivals" }}
+              className="text-[12px] uppercase tracking-[0.25em] text-primary hover:underline"
+            >
+              View all →
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* COLLECTIONS */}
       <section className="mx-auto max-w-7xl px-6 py-20">
@@ -151,7 +247,7 @@ function HomePage() {
       <section className="mx-auto max-w-7xl px-6 pb-24">
         <div className="mb-10 flex items-end justify-between">
           <div>
-            <p className="eyebrow">New arrivals</p>
+            <p className="eyebrow">The full edit</p>
             <h2 className="mt-2 font-serif text-4xl md:text-5xl">The latest atelier drops</h2>
           </div>
           <Link

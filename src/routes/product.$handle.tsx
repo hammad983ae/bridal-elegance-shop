@@ -73,7 +73,7 @@ function ProductPage() {
   const handleAdd = async () => {
     if (!selected) return;
     const productWrapper: ShopifyProduct = { node: product };
-    await addItem({
+    const success = await addItem({
       product: productWrapper,
       variantId: selected.id,
       variantTitle: selected.title,
@@ -81,7 +81,9 @@ function ProductPage() {
       quantity: 1,
       selectedOptions: selected.selectedOptions ?? [],
     });
-    toast.success("Added to bag", { description: product.title, position: "top-right" });
+    if (success) {
+      toast.success("Added to bag", { description: product.title, position: "top-right" });
+    }
   };
 
   return (

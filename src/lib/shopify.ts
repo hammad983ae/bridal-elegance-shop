@@ -123,6 +123,48 @@ export const PRODUCT_BY_HANDLE_QUERY = `
   }
 `;
 
+export const COLLECTION_PRODUCTS_QUERY = `
+  query GetCollectionByHandle($handle: String!, $first: Int!) {
+    collection(handle: $handle) {
+      id
+      title
+      products(first: $first) {
+        edges {
+          node {
+            id
+            title
+            description
+            handle
+            productType
+            vendor
+            priceRange { minVariantPrice { amount currencyCode } }
+            images(first: 5) { edges { node { url altText } } }
+            variants(first: 10) {
+              edges {
+                node {
+                  id
+                  title
+                  price { amount currencyCode }
+                  availableForSale
+                  selectedOptions { name value }
+                }
+              }
+            }
+            options { name values }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchCollectionProducts(handle: string, first = 12): Promise<ShopifyProduct[]> {
+  const res = await storefrontApiRequest<{
+    collection: { products: { edges: ShopifyProduct[] } } | null;
+  }>(COLLECTION_PRODUCTS_QUERY, { handle, first });
+  return res?.data?.collection?.products?.edges ?? [];
+}
+
 export async function fetchProducts(first = 24, query?: string): Promise<ShopifyProduct[]> {
   const res = await storefrontApiRequest<{ products: { edges: ShopifyProduct[] } }>(
     PRODUCTS_QUERY,
