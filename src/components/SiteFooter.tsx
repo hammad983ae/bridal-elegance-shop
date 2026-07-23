@@ -5,7 +5,7 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-border/60 bg-secondary/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
-          <p className="font-serif text-2xl tracking-[0.25em] text-primary">FAIZA AMJAD</p>
+          <img src="/brand/logo.png" alt="Faiza Amjad Studio" className="h-28 w-auto" />
           <p className="mt-3 max-w-sm text-sm text-muted-foreground">
             An atelier of eastern bridal couture, wedding formals and everyday luxe — hand-embroidered in
             limited editions, shipped worldwide.

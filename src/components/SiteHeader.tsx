@@ -4,7 +4,6 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "./ui/sheet";
 import { CartDrawer } from "./CartDrawer";
 
 const COLLECTIONS = [
-  { label: "New Arrivals", collection: "New Arrivals" },
   { label: "Bridal Lehngas", collection: "Bridal Lehngas" },
   { label: "Wedding Formal Dresses", collection: "Wedding Formal Dresses" },
   { label: "Semi Formal", collection: "Semi Formal" },
@@ -135,16 +134,16 @@ export function SiteHeader() {
               <Link
                 to="/shop"
                 search={{ collection: "New Arrivals" }}
-                className={NAV_LINK_CLASS}
+                className="relative pb-px text-[12px] font-bold uppercase tracking-[0.22em] text-red-600 transition-colors duration-200 hover:text-red-700 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-red-600"
               >
-                New Arrivals
+                Sale
               </Link>
             </nav>
           </div>
 
           {/* Center: Logo */}
           <Link to="/" className="flex flex-1 items-center justify-center">
-            <img src="/brand/logo.png" alt="Faiza Amjad Studio" className="h-[84px] w-auto md:h-[104px]" />
+            <img src="/brand/logo.png" alt="Faiza Amjad Studio" className="h-[92px] w-[149px] md:h-[114px] md:w-[184px]" />
           </Link>
 
           {/* Right: Cart */}
