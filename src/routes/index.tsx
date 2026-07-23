@@ -73,11 +73,11 @@ function HeroCarousel() {
       <div ref={emblaRef} className="absolute inset-0">
         <div className="flex h-full">
           {HERO_SLIDES.map((slide, i) => (
-            <div key={i} className="relative min-w-full flex-shrink-0">
+            <div key={i} className="relative min-w-full flex-shrink-0 bg-black">
               <img
                 src={slide.url}
                 alt={slide.alt}
-                className="h-full w-full object-cover object-center"
+                className="h-full w-full object-contain object-[center_40%] md:object-cover"
               />
             </div>
           ))}
@@ -173,7 +173,7 @@ function HomePage() {
           <div className="mb-10 flex items-end justify-between">
             <div>
               <p className="eyebrow">Just landed</p>
-              <h2 className="mt-2 font-serif text-4xl md:text-5xl">New Arrivals</h2>
+              <h2 className="mt-2 font-serif text-4xl md:text-5xl">Sale</h2>
             </div>
             <Link
               to="/shop"

@@ -44,8 +44,7 @@ export function SiteHeader() {
               </SheetTrigger>
               <SheetContent side="left" className="w-72 bg-background px-0 pt-0">
                 <div className="border-b border-border/60 px-6 py-5">
-                  <p className="font-serif text-lg tracking-[0.3em] text-primary">FAIZA AMJAD</p>
-                  <p className="mt-0.5 text-[9px] uppercase tracking-[0.4em] text-muted-foreground">Studio</p>
+                  <img src="/brand/logo.png" alt="Faiza Amjad Studio" className="h-10 w-auto" />
                 </div>
                 <nav className="flex flex-col px-6 pt-4">
                   <SheetClose asChild>
@@ -144,11 +143,8 @@ export function SiteHeader() {
           </div>
 
           {/* Center: Logo */}
-          <Link to="/" className="flex-1 text-center">
-            <p className="font-serif text-xl tracking-[0.35em] text-primary md:text-2xl">FAIZA AMJAD</p>
-            <p className="mt-0.5 hidden text-[8.5px] uppercase tracking-[0.5em] text-muted-foreground md:block">
-              Studio
-            </p>
+          <Link to="/" className="flex flex-1 items-center justify-center">
+            <img src="/brand/logo.png" alt="Faiza Amjad Studio" className="h-[84px] w-auto md:h-[104px]" />
           </Link>
 
           {/* Right: Cart */}
