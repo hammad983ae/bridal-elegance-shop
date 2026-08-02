@@ -12,6 +12,9 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
   const hoverImage = node.images.edges[1]?.node ?? image;
   const firstVariant = node.variants.edges[0]?.node;
   const price = node.priceRange.minVariantPrice;
+  const compareAt = node.compareAtPriceRange?.minVariantPrice;
+  const isOnSale =
+    compareAt && parseFloat(compareAt.amount) > parseFloat(price.amount);
 
   const handleAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -69,14 +72,30 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
             {node.productType}
           </span>
         )}
+        {isOnSale && (
+          <span className="absolute right-3 top-3 bg-red-600 px-2 py-1 text-[10px] uppercase tracking-widest text-white">
+            Sale
+          </span>
+        )}
       </div>
       <div className="mt-4 flex items-baseline justify-between gap-3">
         <h3 className="font-serif text-base font-medium leading-snug text-foreground group-hover:text-primary">
           {node.title}
         </h3>
-        <p className="font-serif text-base text-primary">
-          {formatPrice(price.amount, price.currencyCode)}
-        </p>
+        {isOnSale && compareAt ? (
+          <div className="flex flex-col items-end gap-0.5">
+            <span className="font-serif text-[12px] text-muted-foreground line-through">
+              {formatPrice(compareAt.amount, compareAt.currencyCode)}
+            </span>
+            <span className="font-serif text-base text-red-600">
+              {formatPrice(price.amount, price.currencyCode)}
+            </span>
+          </div>
+        ) : (
+          <p className="font-serif text-base text-primary">
+            {formatPrice(price.amount, price.currencyCode)}
+          </p>
+        )}
       </div>
     </Link>
   );

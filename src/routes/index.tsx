@@ -13,9 +13,9 @@ const productsQuery = queryOptions({
   staleTime: 60_000,
 });
 
-const newArrivalsQuery = queryOptions({
-  queryKey: ["collection", "new-arrivals"],
-  queryFn: () => fetchCollectionProducts("new-arrivals", 8),
+const saleQuery = queryOptions({
+  queryKey: ["collection", "ready-made-sale"],
+  queryFn: () => fetchCollectionProducts("ready-made-sale", 8),
   staleTime: 60_000,
 });
 
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) =>
     Promise.all([
       context.queryClient.ensureQueryData(productsQuery),
-      context.queryClient.ensureQueryData(newArrivalsQuery),
+      context.queryClient.ensureQueryData(saleQuery),
     ]),
   component: HomePage,
 });
@@ -133,7 +133,7 @@ function HeroCarousel() {
 
 function HomePage() {
   const { data: products } = useSuspenseQuery(productsQuery);
-  const { data: newArrivals } = useSuspenseQuery(newArrivalsQuery);
+  const { data: saleProducts } = useSuspenseQuery(saleQuery);
   const featured = products.slice(0, 8);
 
   const collections = [
@@ -167,34 +167,34 @@ function HomePage() {
         </div>
       </section>
 
-      {/* NEW ARRIVALS */}
-      {newArrivals.length > 0 && (
+      {/* SALE */}
+      {saleProducts.length > 0 && (
         <section className="mx-auto max-w-7xl px-6 py-20">
           <div className="mb-10 flex items-end justify-between">
             <div>
-              <p className="eyebrow">Just landed</p>
-              <h2 className="mt-2 font-serif text-4xl md:text-5xl">Sale</h2>
+              <p className="eyebrow text-red-600">Limited time</p>
+              <h2 className="mt-2 font-serif text-4xl md:text-5xl">Ready Made Sale</h2>
             </div>
             <Link
               to="/shop"
-              search={{ collection: "New Arrivals" }}
-              className="hidden text-[12px] uppercase tracking-[0.25em] text-primary hover:underline md:inline-flex"
+              search={{ collection: "Ready Made Sale" }}
+              className="hidden text-[12px] uppercase tracking-[0.25em] text-red-600 hover:underline md:inline-flex"
             >
-              View all →
+              Shop the sale →
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
-            {newArrivals.map((p: ShopifyProduct) => (
+            {saleProducts.map((p: ShopifyProduct) => (
               <ProductCard key={p.node.id} product={p} />
             ))}
           </div>
           <div className="mt-10 text-center md:hidden">
             <Link
               to="/shop"
-              search={{ collection: "New Arrivals" }}
-              className="text-[12px] uppercase tracking-[0.25em] text-primary hover:underline"
+              search={{ collection: "Ready Made Sale" }}
+              className="text-[12px] uppercase tracking-[0.25em] text-red-600 hover:underline"
             >
-              View all →
+              Shop the sale →
             </Link>
           </div>
         </section>

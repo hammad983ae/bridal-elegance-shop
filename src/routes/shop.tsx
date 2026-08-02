@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useMemo, useState, useEffect } from "react";
 import { z } from "zod";
-import { fetchProducts, formatPrice } from "@/lib/shopify";
+import { fetchProducts, fetchCollectionProducts, formatPrice } from "@/lib/shopify";
 import { ProductCard } from "@/components/ProductCard";
 import { Slider } from "@/components/ui/slider";
 
@@ -12,11 +12,25 @@ const searchSchema = z.object({
   priceMax: z.number().optional(),
 });
 
-const allProductsQuery = queryOptions({
-  queryKey: ["all-products"],
-  queryFn: () => fetchProducts(100),
-  staleTime: 60_000,
-});
+function toHandle(title: string) {
+  return title.toLowerCase().replace(/\s+/g, "-");
+}
+
+function shopQuery(collection?: string) {
+  if (!collection) {
+    return queryOptions({
+      queryKey: ["products", "all"],
+      queryFn: () => fetchProducts(100),
+      staleTime: 60_000,
+    });
+  }
+  const handle = toHandle(collection);
+  return queryOptions({
+    queryKey: ["products", "collection", handle],
+    queryFn: () => fetchCollectionProducts(handle, 100),
+    staleTime: 60_000,
+  });
+}
 
 export const Route = createFileRoute("/shop")({
   validateSearch: (s) => searchSchema.parse(s),
@@ -36,7 +50,9 @@ export const Route = createFileRoute("/shop")({
       },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(allProductsQuery),
+  loaderDeps: ({ search }) => ({ collection: search.collection }),
+  loader: ({ context, deps }) =>
+    context.queryClient.ensureQueryData(shopQuery(deps.collection)),
   component: ShopPage,
 });
 
@@ -50,8 +66,8 @@ const CATEGORIES = [
 ];
 
 function ShopPage() {
-  const { data: products } = useSuspenseQuery(allProductsQuery);
   const { collection, priceMin, priceMax } = Route.useSearch();
+  const { data: products } = useSuspenseQuery(shopQuery(collection));
   const navigate = useNavigate({ from: "/shop" });
   const active = collection ?? "All";
 
@@ -93,11 +109,11 @@ function ShopPage() {
   }
 
   const filtered = useMemo(() => {
-    let result = active === "All" ? products : products.filter((p) => p.node.productType === active);
+    let result = products;
     if (priceMin !== undefined) result = result.filter((p) => parseFloat(p.node.priceRange.minVariantPrice.amount) >= priceMin);
     if (priceMax !== undefined) result = result.filter((p) => parseFloat(p.node.priceRange.minVariantPrice.amount) <= priceMax);
     return result;
-  }, [products, active, priceMin, priceMax]);
+  }, [products, priceMin, priceMax]);
 
   const sidebarContent = (
     <>

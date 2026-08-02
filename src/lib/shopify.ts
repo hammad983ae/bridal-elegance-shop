@@ -14,6 +14,7 @@ export interface ShopifyVariant {
   id: string;
   title: string;
   price: ShopifyMoney;
+  compareAtPrice: ShopifyMoney | null;
   availableForSale: boolean;
   selectedOptions: Array<{ name: string; value: string }>;
 }
@@ -27,6 +28,7 @@ export interface ShopifyProduct {
     productType?: string;
     vendor?: string;
     priceRange: { minVariantPrice: ShopifyMoney };
+    compareAtPriceRange: { minVariantPrice: ShopifyMoney } | null;
     images: { edges: Array<{ node: { url: string; altText: string | null } }> };
     variants: { edges: Array<{ node: ShopifyVariant }> };
     options: Array<{ name: string; values: string[] }>;
@@ -77,6 +79,7 @@ export const PRODUCTS_QUERY = `
           productType
           vendor
           priceRange { minVariantPrice { amount currencyCode } }
+          compareAtPriceRange { minVariantPrice { amount currencyCode } }
           images(first: 5) { edges { node { url altText } } }
           variants(first: 10) {
             edges {
@@ -84,6 +87,7 @@ export const PRODUCTS_QUERY = `
                 id
                 title
                 price { amount currencyCode }
+                compareAtPrice { amount currencyCode }
                 availableForSale
                 selectedOptions { name value }
               }
@@ -106,6 +110,7 @@ export const PRODUCT_BY_HANDLE_QUERY = `
       productType
       vendor
       priceRange { minVariantPrice { amount currencyCode } }
+      compareAtPriceRange { minVariantPrice { amount currencyCode } }
       images(first: 10) { edges { node { url altText } } }
       variants(first: 20) {
         edges {
@@ -113,6 +118,7 @@ export const PRODUCT_BY_HANDLE_QUERY = `
             id
             title
             price { amount currencyCode }
+            compareAtPrice { amount currencyCode }
             availableForSale
             selectedOptions { name value }
           }
@@ -138,6 +144,7 @@ export const COLLECTION_PRODUCTS_QUERY = `
             productType
             vendor
             priceRange { minVariantPrice { amount currencyCode } }
+            compareAtPriceRange { minVariantPrice { amount currencyCode } }
             images(first: 5) { edges { node { url altText } } }
             variants(first: 10) {
               edges {
@@ -145,6 +152,7 @@ export const COLLECTION_PRODUCTS_QUERY = `
                   id
                   title
                   price { amount currencyCode }
+                  compareAtPrice { amount currencyCode }
                   availableForSale
                   selectedOptions { name value }
                 }

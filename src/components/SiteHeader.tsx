@@ -9,6 +9,10 @@ const COLLECTIONS = [
   { label: "Semi Formal", collection: "Semi Formal" },
   { label: "Embroidered Pret", collection: "Embroidered Pret" },
   { label: "Velvets", collection: "Velvets" },
+  { label: "Embroidery", collection: "Embroidery" },
+  { label: "Heavy Embroidery", collection: "Heavy Embroidery" },
+  { label: "Simple Outfit", collection: "Simple Outfit" },
+  { label: "Cuts Outfit", collection: "Cuts Outfit" },
 ] as const;
 
 const NAV_LINK_CLASS =
@@ -65,7 +69,7 @@ export function SiteHeader() {
                   <p className="pb-2 pt-5 text-[9px] uppercase tracking-[0.35em] text-muted-foreground/60">
                     Collections
                   </p>
-                  {COLLECTIONS.map((c) => (
+                  {COLLECTIONS.filter((c) => c.collection !== "New Arrivals").map((c) => (
                     <SheetClose asChild key={c.collection}>
                       <Link
                         to="/shop"
@@ -76,6 +80,15 @@ export function SiteHeader() {
                       </Link>
                     </SheetClose>
                   ))}
+                  <SheetClose asChild>
+                    <Link
+                      to="/shop"
+                      search={{ collection: "Ready Made Sale" }}
+                      className="border-b border-border/40 py-3.5 text-[12px] uppercase tracking-[0.2em] font-semibold animate-pulse text-red-600 transition hover:text-red-500"
+                    >
+                      Ready Made Sale
+                    </Link>
+                  </SheetClose>
                 </nav>
               </SheetContent>
             </Sheet>
@@ -133,10 +146,10 @@ export function SiteHeader() {
 
               <Link
                 to="/shop"
-                search={{ collection: "New Arrivals" }}
-                className="relative pb-px text-[12px] font-bold uppercase tracking-[0.22em] text-red-600 transition-colors duration-200 hover:text-red-700 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-red-600"
+                search={{ collection: "Ready Made Sale" }}
+                className="relative pb-px text-[11px] uppercase tracking-[0.22em] font-semibold animate-pulse text-red-600 hover:text-red-500 transition-colors duration-200"
               >
-                Sale
+                Ready Made Sale
               </Link>
             </nav>
           </div>
