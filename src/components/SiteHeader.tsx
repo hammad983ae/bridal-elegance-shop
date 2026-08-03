@@ -2,18 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, ChevronDown } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "./ui/sheet";
 import { CartDrawer } from "./CartDrawer";
-
-const COLLECTIONS = [
-  { label: "Bridal Lehngas", collection: "Bridal Lehngas" },
-  { label: "Wedding Formal Dresses", collection: "Wedding Formal Dresses" },
-  { label: "Semi Formal", collection: "Semi Formal" },
-  { label: "Embroidered Pret", collection: "Embroidered Pret" },
-  { label: "Velvets", collection: "Velvets" },
-  { label: "Embroidery", collection: "Embroidery" },
-  { label: "Heavy Embroidery", collection: "Heavy Embroidery" },
-  { label: "Simple Outfit", collection: "Simple Outfit" },
-  { label: "Cuts Outfit", collection: "Cuts Outfit" },
-] as const;
+import { COLLECTIONS } from "@/lib/collections";
 
 const NAV_LINK_CLASS =
   "relative pb-px text-[11px] uppercase tracking-[0.22em] text-muted-foreground transition-colors duration-200 hover:text-foreground " +

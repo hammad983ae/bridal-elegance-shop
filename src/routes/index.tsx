@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useSuspenseQueries } from "@tanstack/react-query";
 import { queryOptions } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowRight, Scissors, Truck, Sparkles, PenTool, Ruler } from "lucide-react";
 import { fetchProducts, fetchCollectionProducts, type ShopifyProduct } from "@/lib/shopify";
@@ -20,9 +20,38 @@ const productsQuery = queryOptions({
 
 const saleQuery = queryOptions({
   queryKey: ["collection", "ready-made-sale"],
-  queryFn: () => fetchCollectionProducts("ready-made-sale", 8),
+  queryFn: () => fetchCollectionProducts("ready-made-sale", 70),
   staleTime: 60_000,
 });
+
+// The sale collection is manually sorted with same-type pieces grouped together,
+// so pulling the first N gives one category at a similar price. Round-robin across
+// product types (cheapest of each type first) to surface a spread of categories and prices.
+function pickDiverseSaleMix(products: ShopifyProduct[], count: number) {
+  const byType = new Map<string, ShopifyProduct[]>();
+  for (const p of products) {
+    const key = p.node.productType || "Other";
+    if (!byType.has(key)) byType.set(key, []);
+    byType.get(key)!.push(p);
+  }
+  const groups = Array.from(byType.values());
+  for (const group of groups) {
+    group.sort(
+      (a, b) =>
+        parseFloat(a.node.priceRange.minVariantPrice.amount) -
+        parseFloat(b.node.priceRange.minVariantPrice.amount),
+    );
+  }
+
+  const result: ShopifyProduct[] = [];
+  for (let i = 0; result.length < count && groups.some((g) => i < g.length); i++) {
+    for (const group of groups) {
+      if (result.length >= count) break;
+      if (group[i]) result.push(group[i]);
+    }
+  }
+  return result;
+}
 
 const OCCASION_COLLECTIONS = [
   { name: "Bridal Lehngas", tagline: "Statement heirlooms" },
@@ -155,7 +184,8 @@ function HeroCarousel() {
 
 function HomePage() {
   const { data: products } = useSuspenseQuery(productsQuery);
-  const { data: saleProducts } = useSuspenseQuery(saleQuery);
+  const { data: saleProductPool } = useSuspenseQuery(saleQuery);
+  const saleProducts = useMemo(() => pickDiverseSaleMix(saleProductPool, 8), [saleProductPool]);
   const featured = products.slice(0, 8);
 
   const occasionCovers = useSuspenseQueries({

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { fetchProducts, fetchCollectionProducts, formatPrice } from "@/lib/shopify";
 import { ProductCard } from "@/components/ProductCard";
 import { Slider } from "@/components/ui/slider";
+import { COLLECTIONS } from "@/lib/collections";
 
 const searchSchema = z.object({
   collection: z.string().optional(),
@@ -56,13 +57,9 @@ export const Route = createFileRoute("/shop")({
   component: ShopPage,
 });
 
-const CATEGORIES = [
+const CATEGORIES: Array<{ label: string; collection: string | null }> = [
   { label: "All", collection: null },
-  { label: "Bridal Lehngas", collection: "Bridal Lehngas" },
-  { label: "Wedding Formal Dresses", collection: "Wedding Formal Dresses" },
-  { label: "Semi Formal", collection: "Semi Formal" },
-  { label: "Embroidered Pret", collection: "Embroidered Pret" },
-  { label: "Velvets", collection: "Velvets" },
+  ...COLLECTIONS.map((c) => ({ label: c.label, collection: c.collection })),
 ];
 
 function ShopPage() {
