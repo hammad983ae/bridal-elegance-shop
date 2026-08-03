@@ -180,7 +180,7 @@ function HeroCarousel({ slides }: { slides: HeroImage[][] }) {
         </div>
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary" />
 
       {/* Content */}
       <div className="relative mx-auto flex h-[70vh] max-w-7xl flex-col justify-end px-6 pb-24 pt-32 md:min-h-[88vh]">
