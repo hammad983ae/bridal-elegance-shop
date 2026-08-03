@@ -88,6 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Handcrafted eastern bridal lehngas, wedding formals and semi-formal couture by Faiza Amjad Studio. Made-to-order, shipped worldwide.",
       },
       { name: "author", content: "Faiza Amjad Studio" },
+      { property: "og:site_name", content: "Faiza Amjad Studio" },
       { property: "og:title", content: "Faiza Amjad Studio — Bridal & Formal Couture" },
       {
         property: "og:description",
@@ -95,14 +96,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Handcrafted eastern bridal lehngas, wedding formals and semi-formal couture. Made-to-order, shipped worldwide.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "/brand/logo.png" },
+      { property: "og:image:width", content: "1536" },
+      { property: "og:image:height", content: "1024" },
+      { property: "og:image:alt", content: "Faiza Amjad Studio" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Faiza Amjad Studio — Bridal & Formal Couture" },
+      {
+        name: "twitter:description",
+        content:
+          "Handcrafted eastern bridal lehngas, wedding formals and semi-formal couture. Made-to-order, shipped worldwide.",
+      },
+      { name: "twitter:image", content: "/brand/logo.png" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", href: "/brand/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/brand/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
