@@ -17,6 +17,20 @@ function toHandle(title: string) {
   return title.toLowerCase().replace(/\s+/g, "-");
 }
 
+const heroQuery = queryOptions({
+  queryKey: ["collection", "bridal-lehngas", "hero"],
+  queryFn: () => fetchCollectionProducts("bridal-lehngas", 9),
+  staleTime: 60_000,
+});
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const groups: T[][] = [];
+  for (let i = 0; i + size <= items.length; i += size) {
+    groups.push(items.slice(i, i + size));
+  }
+  return groups;
+}
+
 const productsQuery = queryOptions({
   queryKey: ["home-products"],
   queryFn: () => fetchProducts(24),
@@ -101,6 +115,7 @@ export const Route = createFileRoute("/")({
     Promise.all([
       context.queryClient.ensureQueryData(productsQuery),
       context.queryClient.ensureQueryData(saleQuery),
+      context.queryClient.ensureQueryData(heroQuery),
       ...OCCASION_COLLECTIONS.map((c) =>
         context.queryClient.ensureQueryData(occasionCoverQuery(c)),
       ),
@@ -108,41 +123,51 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const HERO_SLIDES = [
-  { url: "/hero/hero-1.jpg", alt: "Faiza Amjad bridal couture" },
-  { url: "/hero/hero-2.jpg", alt: "Faiza Amjad bridal couture" },
-  { url: "/hero/hero-3.jpg", alt: "Faiza Amjad bridal couture" },
+type HeroImage = { url: string; alt: string };
+
+const FALLBACK_HERO_SLIDES: HeroImage[][] = [
+  [
+    { url: "/hero/hero-1.jpg", alt: "Faiza Amjad bridal couture" },
+    { url: "/hero/hero-2.jpg", alt: "Faiza Amjad bridal couture" },
+    { url: "/hero/hero-3.jpg", alt: "Faiza Amjad bridal couture" },
+  ],
 ];
 
-function HeroCarousel() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+function HeroCarousel({ slides }: { slides: HeroImage[][] }) {
+  const heroSlides = slides.length > 0 ? slides : FALLBACK_HERO_SLIDES;
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: heroSlides.length > 1 });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || heroSlides.length <= 1) return;
     const interval = setInterval(() => emblaApi.scrollNext(), 5000);
     return () => clearInterval(interval);
-  }, [emblaApi]);
+  }, [emblaApi, heroSlides.length]);
 
   useEffect(() => {
     if (!emblaApi) return;
     const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
     emblaApi.on("select", onSelect);
-    return () => { emblaApi.off("select", onSelect); };
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
   }, [emblaApi]);
 
   return (
-    <section className="relative min-h-[88vh] w-full overflow-hidden">
+    <section className="relative h-[70vh] w-full overflow-hidden md:min-h-[88vh]">
       {/* Slides */}
       <div ref={emblaRef} className="absolute inset-0">
         <div className="flex h-full">
-          {HERO_SLIDES.map((slide, i) => (
-            <div key={i} className="relative min-w-full flex-shrink-0 bg-black">
-              <img
-                src={slide.url}
-                alt={slide.alt}
-                className="h-full w-full object-contain object-[center_40%] md:object-cover"
-              />
+          {heroSlides.map((slide, i) => (
+            <div
+              key={i}
+              className="grid min-w-full flex-shrink-0 grid-cols-3 gap-[2px] bg-background/20"
+            >
+              {slide.map((img, j) => (
+                <div key={j} className="relative h-full overflow-hidden bg-black">
+                  <img src={img.url} alt={img.alt} className="h-full w-full object-cover" />
+                </div>
+              ))}
             </div>
           ))}
         </div>
@@ -151,7 +176,7 @@ function HeroCarousel() {
       <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-background" />
 
       {/* Content */}
-      <div className="relative mx-auto flex min-h-[88vh] max-w-7xl flex-col justify-end px-6 pb-24 pt-32">
+      <div className="relative mx-auto flex h-[70vh] max-w-7xl flex-col justify-end px-6 pb-24 pt-32 md:min-h-[88vh]">
         <p className="eyebrow text-background/80">Autumn / Winter Edit — Now Shipping</p>
         <h1 className="mt-4 max-w-3xl font-serif text-5xl font-medium leading-[1.05] text-background md:text-7xl">
           Bridal couture,<br />
@@ -179,18 +204,20 @@ function HeroCarousel() {
       </div>
 
       {/* Dot indicators */}
-      <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2">
-        {HERO_SLIDES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => emblaApi?.scrollTo(i)}
-            aria-label={`Go to slide ${i + 1}`}
-            className={`h-[3px] transition-all duration-300 ${
-              i === selectedIndex ? "w-8 bg-background" : "w-4 bg-background/40"
-            }`}
-          />
-        ))}
-      </div>
+      {heroSlides.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2">
+          {heroSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => emblaApi?.scrollTo(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className={`h-[3px] transition-all duration-300 ${
+                i === selectedIndex ? "w-8 bg-background" : "w-4 bg-background/40"
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -198,8 +225,17 @@ function HeroCarousel() {
 function HomePage() {
   const { data: products } = useSuspenseQuery(productsQuery);
   const { data: saleProductPool } = useSuspenseQuery(saleQuery);
+  const { data: heroProducts } = useSuspenseQuery(heroQuery);
   const saleProducts = useMemo(() => pickDiverseSaleMix(saleProductPool, 8), [saleProductPool]);
   const featured = products.slice(0, 8);
+
+  const heroSlides = useMemo(() => {
+    const images = heroProducts
+      .map((p) => p.node.images.edges[0]?.node)
+      .filter((img): img is { url: string; altText: string | null } => Boolean(img))
+      .map((img) => ({ url: img.url, alt: img.altText ?? "Faiza Amjad bridal couture" }));
+    return chunk(images, 3);
+  }, [heroProducts]);
 
   const occasionCovers = useSuspenseQueries({
     queries: OCCASION_COLLECTIONS.map((c) => occasionCoverQuery(c)),
@@ -214,7 +250,7 @@ function HomePage() {
   return (
     <div>
       {/* HERO */}
-      <HeroCarousel />
+      <HeroCarousel slides={heroSlides} />
 
       {/* MARQUEE VALUE PROPS */}
       <section className="border-y border-border/60 bg-secondary/30">
