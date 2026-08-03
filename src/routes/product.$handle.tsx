@@ -1,10 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, ShoppingBag, Truck, RotateCcw, Scissors } from "lucide-react";
 import { toast } from "sonner";
 import { fetchProductByHandle, formatPrice, type ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 
 const productQuery = (handle: string) =>
   queryOptions({
@@ -65,12 +66,26 @@ function ProductPage() {
 
   const [variantIdx, setVariantIdx] = useState(0);
   const [imgIdx, setImgIdx] = useState(0);
+  const [galleryApi, setGalleryApi] = useState<CarouselApi>();
   const variants = product.variants.edges;
   const selected = variants[variantIdx]?.node ?? variants[0]?.node;
   const images = product.images.edges;
   const price = selected?.price ?? product.priceRange.minVariantPrice;
   const compareAt = selected?.compareAtPrice ?? product.compareAtPriceRange?.minVariantPrice;
   const isOnSale = compareAt && parseFloat(compareAt.amount) > parseFloat(price.amount);
+
+  useEffect(() => {
+    if (!galleryApi) return;
+    const onSelect = () => setImgIdx(galleryApi.selectedScrollSnap());
+    galleryApi.on("select", onSelect);
+    return () => {
+      galleryApi.off("select", onSelect);
+    };
+  }, [galleryApi]);
+
+  useEffect(() => {
+    galleryApi?.scrollTo(imgIdx);
+  }, [galleryApi, imgIdx]);
 
   const handleAdd = async () => {
     if (!selected) return;
@@ -101,15 +116,22 @@ function ProductPage() {
       <div className="grid gap-10 lg:grid-cols-2">
         {/* GALLERY */}
         <div>
-          <div className="aspect-[3/4] overflow-hidden bg-secondary/40">
-            {images[imgIdx]?.node && (
-              <img
-                src={images[imgIdx].node.url}
-                alt={images[imgIdx].node.altText ?? product.title}
-                className="h-full w-full object-cover"
-              />
-            )}
-          </div>
+          <Carousel setApi={setGalleryApi} opts={{ loop: images.length > 1 }} className="w-full">
+            <CarouselContent className="ml-0">
+              {images.map((im) => (
+                <CarouselItem key={im.node.url} className="pl-0">
+                  <div className="aspect-[3/4] overflow-hidden bg-secondary/40">
+                    <img
+                      src={im.node.url}
+                      alt={im.node.altText ?? product.title}
+                      className="h-full w-full object-cover"
+                      draggable={false}
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
           {images.length > 1 && (
             <div className="mt-3 grid grid-cols-5 gap-2">
               {images.map((im, i) => (
