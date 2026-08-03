@@ -6,6 +6,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ArrowRight, Scissors, Truck, Sparkles, PenTool, Ruler } from "lucide-react";
 import { fetchProducts, fetchCollectionProducts, type ShopifyProduct } from "@/lib/shopify";
 import { ProductCard } from "@/components/ProductCard";
+import { CustomDesignDialog } from "@/components/CustomDesignDialog";
 
 function toHandle(title: string) {
   return title.toLowerCase().replace(/\s+/g, "-");
@@ -352,12 +353,11 @@ function HomePage() {
               ))}
             </div>
 
-            <Link
-              to="/shop"
-              className="mt-9 inline-flex h-12 items-center gap-2 bg-primary px-8 text-[12px] uppercase tracking-[0.28em] text-primary-foreground transition hover:bg-primary/90"
-            >
-              Start designing <ArrowRight className="h-4 w-4" />
-            </Link>
+            <CustomDesignDialog>
+              <button className="mt-9 inline-flex h-12 items-center gap-2 bg-primary px-8 text-[12px] uppercase tracking-[0.28em] text-primary-foreground transition hover:bg-primary/90">
+                Start designing <ArrowRight className="h-4 w-4" />
+              </button>
+            </CustomDesignDialog>
           </div>
         </div>
       </section>
