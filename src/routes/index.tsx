@@ -390,13 +390,13 @@ function HomePage() {
               <img
                 src={customCover.url}
                 alt="Custom bespoke piece"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             ) : (
               <img
                 src="/hero/hero-3.jpg"
                 alt="Custom bespoke piece"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
