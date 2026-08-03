@@ -35,6 +35,10 @@ const consultSchema = z.object({
   email: z.string().trim().email("Enter a valid email address"),
   phone: z.string().trim().optional(),
   vision: z.string().trim().min(10, "Tell us a little more about the piece you have in mind"),
+  bust: z.string().trim().optional(),
+  waist: z.string().trim().optional(),
+  hips: z.string().trim().optional(),
+  height: z.string().trim().optional(),
 });
 
 type ConsultValues = z.infer<typeof consultSchema>;
@@ -48,7 +52,16 @@ export function CustomDesignDialog({ children }: { children: React.ReactNode }) 
 
   const form = useForm<ConsultValues>({
     resolver: zodResolver(consultSchema),
-    defaultValues: { name: "", email: "", phone: "", vision: "" },
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      vision: "",
+      bust: "",
+      waist: "",
+      hips: "",
+      height: "",
+    },
   });
 
   const resetAll = () => {
@@ -86,6 +99,13 @@ export function CustomDesignDialog({ children }: { children: React.ReactNode }) 
   const onSubmit = async (values: ConsultValues) => {
     setIsSubmitting(true);
     try {
+      const measurements = [
+        values.bust ? `Bust: ${values.bust}` : null,
+        values.waist ? `Waist: ${values.waist}` : null,
+        values.hips ? `Hips: ${values.hips}` : null,
+        values.height ? `Height: ${values.height}` : null,
+      ].filter((l) => l !== null);
+
       const lines = [
         `Name: ${values.name}`,
         `Email: ${values.email}`,
@@ -94,6 +114,9 @@ export function CustomDesignDialog({ children }: { children: React.ReactNode }) 
         "Vision:",
         values.vision,
       ];
+      if (measurements.length > 0) {
+        lines.push("", "Measurements:", ...measurements);
+      }
       if (images.length > 0) {
         lines.push(
           "",
@@ -129,7 +152,7 @@ export function CustomDesignDialog({ children }: { children: React.ReactNode }) 
           </DialogTitle>
           <DialogDescription>
             Tell us about the piece you're dreaming of — silhouette, fabric, embroidery, occasion
-            date — and share a few reference photos if you have them.
+            date — and share your measurements and a few reference photos if you have them.
           </DialogDescription>
         </DialogHeader>
 
@@ -207,6 +230,64 @@ export function CustomDesignDialog({ children }: { children: React.ReactNode }) 
                 </FormItem>
               )}
             />
+
+            <div>
+              <p className="eyebrow mb-3 text-muted-foreground">Measurements (optional)</p>
+              <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
+                <FormField
+                  control={form.control}
+                  name="bust"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="eyebrow text-muted-foreground">Bust</FormLabel>
+                      <FormControl>
+                        <Input className={fieldClass} placeholder="e.g. 36in" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="waist"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="eyebrow text-muted-foreground">Waist</FormLabel>
+                      <FormControl>
+                        <Input className={fieldClass} placeholder="e.g. 30in" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hips"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="eyebrow text-muted-foreground">Hips</FormLabel>
+                      <FormControl>
+                        <Input className={fieldClass} placeholder="e.g. 38in" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="height"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="eyebrow text-muted-foreground">Height</FormLabel>
+                      <FormControl>
+                        <Input className={fieldClass} placeholder={`e.g. 5'6"`} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             <div>
               <p className="eyebrow mb-2 text-muted-foreground">Reference photos (optional)</p>

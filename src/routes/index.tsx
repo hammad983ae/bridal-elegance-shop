@@ -404,26 +404,6 @@ function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* EDITORIAL CTA */}
-      <section className="mx-auto max-w-7xl px-6 pb-24">
-        <div className="relative overflow-hidden bg-primary px-6 py-20 text-center text-primary-foreground md:px-16 md:py-28">
-          <p className="eyebrow text-primary-foreground/70">The bridal consultation</p>
-          <h2 className="mx-auto mt-4 max-w-2xl font-serif text-4xl md:text-5xl">
-            Design a piece that's yours alone.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm text-primary-foreground/80">
-            Book a private appointment with our design team to commission a custom bridal or formal
-            ensemble — from silhouette to embroidery motif.
-          </p>
-          <Link
-            to="/shop"
-            className="mt-8 inline-flex h-12 items-center gap-2 bg-background px-8 text-[12px] uppercase tracking-[0.28em] text-primary transition hover:bg-background/90"
-          >
-            Begin your commission <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }
