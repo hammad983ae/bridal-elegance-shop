@@ -69,6 +69,8 @@ function ProductPage() {
   const selected = variants[variantIdx]?.node ?? variants[0]?.node;
   const images = product.images.edges;
   const price = selected?.price ?? product.priceRange.minVariantPrice;
+  const compareAt = selected?.compareAtPrice ?? product.compareAtPriceRange?.minVariantPrice;
+  const isOnSale = compareAt && parseFloat(compareAt.amount) > parseFloat(price.amount);
 
   const handleAdd = async () => {
     if (!selected) return;
@@ -131,9 +133,20 @@ function ProductPage() {
             <p className="eyebrow">{product.productType}</p>
           )}
           <h1 className="mt-2 font-serif text-4xl md:text-5xl">{product.title}</h1>
-          <p className="mt-3 font-serif text-2xl text-primary">
-            {formatPrice(price.amount, price.currencyCode)}
-          </p>
+          {isOnSale && compareAt ? (
+            <p className="mt-3 flex items-baseline gap-3">
+              <span className="font-serif text-2xl text-red-600">
+                {formatPrice(price.amount, price.currencyCode)}
+              </span>
+              <span className="font-serif text-base text-muted-foreground line-through">
+                {formatPrice(compareAt.amount, compareAt.currencyCode)}
+              </span>
+            </p>
+          ) : (
+            <p className="mt-3 font-serif text-2xl text-primary">
+              {formatPrice(price.amount, price.currencyCode)}
+            </p>
+          )}
 
           {product.description && (
             <p className="mt-6 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
