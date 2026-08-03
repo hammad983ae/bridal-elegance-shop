@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Loader2, ShoppingBag, Truck, RotateCcw, Scissors } from "lucide-react";
+import { Loader2, ShoppingBag, Truck, Info, Scissors } from "lucide-react";
 import { toast } from "sonner";
 import { fetchProductByHandle, formatPrice, type ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
@@ -223,8 +223,11 @@ function ProductPage() {
               <span>Insured worldwide shipping, tracked from Lahore.</span>
             </div>
             <div className="flex items-start gap-3">
-              <RotateCcw className="mt-0.5 h-4 w-4 text-primary" strokeWidth={1.4} />
-              <span>7-day exchange on ready-to-ship pieces.</span>
+              <Info className="mt-0.5 h-4 w-4 text-primary" strokeWidth={1.4} />
+              <span>
+                Please note; Slight variations in color may occur due to lighting, photography, and
+                screen display settings.
+              </span>
             </div>
           </div>
         </div>
