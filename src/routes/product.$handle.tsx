@@ -170,10 +170,17 @@ function ProductPage() {
             </p>
           )}
 
-          {product.description && (
-            <p className="mt-6 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-              {product.description}
-            </p>
+          {product.descriptionHtml ? (
+            <div
+              className="mt-6 space-y-3 text-sm leading-relaxed text-muted-foreground [&_li]:ml-4 [&_li]:list-disc [&_p]:leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
+            />
+          ) : (
+            product.description && (
+              <p className="mt-6 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                {product.description}
+              </p>
+            )
           )}
 
           {variants.length > 1 && (
