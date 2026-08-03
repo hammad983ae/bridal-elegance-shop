@@ -86,7 +86,7 @@ export function SiteHeader() {
                       search={{ collection: "Ready Made Sale" }}
                       className="border-b border-border/40 py-3.5 text-[12px] uppercase tracking-[0.2em] font-semibold animate-pulse text-red-600 transition hover:text-red-500"
                     >
-                      Ready Made Sale
+                      (upto 50%) Ready Made Sale
                     </Link>
                   </SheetClose>
                 </nav>
@@ -149,7 +149,7 @@ export function SiteHeader() {
                 search={{ collection: "Ready Made Sale" }}
                 className="relative pb-px text-[11px] uppercase tracking-[0.22em] font-semibold animate-pulse text-red-600 hover:text-red-500 transition-colors duration-200"
               >
-                Ready Made Sale
+                (upto 50%) Ready Made Sale
               </Link>
             </nav>
           </div>
