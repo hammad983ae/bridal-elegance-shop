@@ -4,7 +4,12 @@ import { queryOptions } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowRight, Scissors, Truck, Sparkles, PenTool, Ruler } from "lucide-react";
-import { fetchProducts, fetchCollectionProducts, type ShopifyProduct } from "@/lib/shopify";
+import {
+  fetchProducts,
+  fetchCollectionProducts,
+  fetchProductByHandle,
+  type ShopifyProduct,
+} from "@/lib/shopify";
 import { ProductCard } from "@/components/ProductCard";
 import { CustomDesignDialog } from "@/components/CustomDesignDialog";
 
@@ -54,16 +59,24 @@ function pickDiverseSaleMix(products: ShopifyProduct[], count: number) {
 }
 
 const OCCASION_COLLECTIONS = [
-  { name: "Bridal Lehngas", tagline: "Statement heirlooms" },
+  { name: "Bridal Lehngas", tagline: "Statement heirlooms", coverHandle: "libaas-e-khaas-1" },
   { name: "Wedding Formal Dresses", tagline: "The occasion edit" },
   { name: "Semi Formal", tagline: "Everyday luxe" },
   { name: "Velvets", tagline: "Winter couture" },
 ];
 
-const occasionCoverQuery = (name: string) =>
+const occasionCoverQuery = (c: { name: string; coverHandle?: string }) =>
   queryOptions({
-    queryKey: ["collection-cover", toHandle(name)],
-    queryFn: () => fetchCollectionProducts(toHandle(name), 1),
+    queryKey: c.coverHandle
+      ? ["product-cover", c.coverHandle]
+      : ["collection-cover", toHandle(c.name)],
+    queryFn: async () => {
+      if (c.coverHandle) {
+        const product = await fetchProductByHandle(c.coverHandle);
+        return product ? [{ node: product }] : [];
+      }
+      return fetchCollectionProducts(toHandle(c.name), 1);
+    },
     staleTime: 60_000,
   });
 
@@ -89,7 +102,7 @@ export const Route = createFileRoute("/")({
       context.queryClient.ensureQueryData(productsQuery),
       context.queryClient.ensureQueryData(saleQuery),
       ...OCCASION_COLLECTIONS.map((c) =>
-        context.queryClient.ensureQueryData(occasionCoverQuery(c.name)),
+        context.queryClient.ensureQueryData(occasionCoverQuery(c)),
       ),
     ]),
   component: HomePage,
@@ -189,7 +202,7 @@ function HomePage() {
   const featured = products.slice(0, 8);
 
   const occasionCovers = useSuspenseQueries({
-    queries: OCCASION_COLLECTIONS.map((c) => occasionCoverQuery(c.name)),
+    queries: OCCASION_COLLECTIONS.map((c) => occasionCoverQuery(c)),
   });
   const collections = OCCASION_COLLECTIONS.map((c, i) => ({
     ...c,
