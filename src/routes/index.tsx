@@ -286,7 +286,7 @@ function HomePage() {
         <section className="mx-auto max-w-7xl px-6 py-20">
           <div className="mb-10 flex items-end justify-between">
             <div>
-              <p className="eyebrow text-red-600">Limited time</p>
+              <p className="eyebrow text-red-600">Upto 50%</p>
               <h2 className="mt-2 font-serif text-4xl md:text-5xl">Ready Made Sale</h2>
             </div>
             <Link
