@@ -30,7 +30,11 @@ export interface ShopifyProduct {
     vendor?: string;
     priceRange: { minVariantPrice: ShopifyMoney };
     compareAtPriceRange: { minVariantPrice: ShopifyMoney } | null;
-    images: { edges: Array<{ node: { url: string; altText: string | null } }> };
+    images: {
+      edges: Array<{
+        node: { url: string; altText: string | null; width?: number; height?: number };
+      }>;
+    };
     variants: { edges: Array<{ node: ShopifyVariant }> };
     options: Array<{ name: string; values: string[] }>;
   };
@@ -81,7 +85,7 @@ export const PRODUCTS_QUERY = `
           vendor
           priceRange { minVariantPrice { amount currencyCode } }
           compareAtPriceRange { minVariantPrice { amount currencyCode } }
-          images(first: 5) { edges { node { url altText } } }
+          images(first: 5) { edges { node { url altText width height } } }
           variants(first: 10) {
             edges {
               node {
@@ -113,7 +117,7 @@ export const PRODUCT_BY_HANDLE_QUERY = `
       vendor
       priceRange { minVariantPrice { amount currencyCode } }
       compareAtPriceRange { minVariantPrice { amount currencyCode } }
-      images(first: 10) { edges { node { url altText } } }
+      images(first: 10) { edges { node { url altText width height } } }
       variants(first: 20) {
         edges {
           node {
@@ -147,7 +151,7 @@ export const COLLECTION_PRODUCTS_QUERY = `
             vendor
             priceRange { minVariantPrice { amount currencyCode } }
             compareAtPriceRange { minVariantPrice { amount currencyCode } }
-            images(first: 5) { edges { node { url altText } } }
+            images(first: 5) { edges { node { url altText width height } } }
             variants(first: 10) {
               edges {
                 node {

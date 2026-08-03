@@ -19,9 +19,13 @@ function toHandle(title: string) {
 
 const heroQuery = queryOptions({
   queryKey: ["collection", "bridal-lehngas", "hero"],
-  queryFn: () => fetchCollectionProducts("bridal-lehngas", 9),
+  queryFn: () => fetchCollectionProducts("bridal-lehngas", 24),
   staleTime: 60_000,
 });
+
+// Hero columns are narrow and tall, so only use images with a comfortably portrait
+// aspect ratio — a near-square or landscape photo gets cropped down to a sliver.
+const HERO_MAX_ASPECT_RATIO = 0.85;
 
 function chunk<T>(items: T[], size: number): T[][] {
   const groups: T[][] = [];
@@ -233,9 +237,12 @@ function HomePage() {
   const featured = products.slice(0, 8);
 
   const heroSlides = useMemo(() => {
+    type HeroCandidate = { url: string; altText: string | null; width?: number; height?: number };
     const images = heroProducts
       .map((p) => p.node.images.edges[0]?.node)
-      .filter((img): img is { url: string; altText: string | null } => Boolean(img))
+      .filter((img): img is HeroCandidate => Boolean(img))
+      .filter((img) => !img.width || !img.height || img.width / img.height <= HERO_MAX_ASPECT_RATIO)
+      .slice(0, 9)
       .map((img) => ({ url: img.url, alt: img.altText ?? "Faiza Amjad bridal couture" }));
     return chunk(images, 3);
   }, [heroProducts]);
