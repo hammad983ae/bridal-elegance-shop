@@ -15,7 +15,7 @@ export function SiteHeader() {
     <div className="sticky top-0 z-40">
       {/* Promo bar */}
       <div className="bg-primary px-4 py-2 text-center text-[10px] uppercase tracking-[0.28em] text-primary-foreground/85">
-        Made to order · Worldwide shipping · 4–6 weeks delivery
+        Made to order · Worldwide shipping · 8 days delivery · Exchange accepted
       </div>
 
       {/* Main header */}
