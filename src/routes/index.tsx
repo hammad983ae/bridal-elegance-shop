@@ -3,7 +3,7 @@ import { useSuspenseQuery, useSuspenseQueries } from "@tanstack/react-query";
 import { queryOptions } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ArrowRight, Scissors, Truck, Sparkles } from "lucide-react";
+import { ArrowRight, Scissors, Truck, Sparkles, PenTool, Ruler } from "lucide-react";
 import { fetchProducts, fetchCollectionProducts, type ShopifyProduct } from "@/lib/shopify";
 import { ProductCard } from "@/components/ProductCard";
 
@@ -165,6 +165,8 @@ function HomePage() {
     cover: occasionCovers[i].data[0]?.node.images.edges[0]?.node,
   }));
 
+  const customCover = products[8]?.node.images.edges[0]?.node ?? products[0]?.node.images.edges[0]?.node;
+
   return (
     <div>
       {/* HERO */}
@@ -288,6 +290,76 @@ function HomePage() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* CUSTOM DESIGN */}
+      <section className="mx-auto max-w-7xl px-6 pb-24">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="relative order-2 aspect-[4/5] overflow-hidden bg-secondary/40 lg:order-1">
+            {customCover ? (
+              <img
+                src={customCover.url}
+                alt="Custom bespoke piece"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <img
+                src="/hero/hero-3.jpg"
+                alt="Custom bespoke piece"
+                className="h-full w-full object-cover"
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
+          </div>
+          <div className="order-1 lg:order-2">
+            <p className="eyebrow">Bespoke by design</p>
+            <h2 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">
+              Create a piece that exists only for you.
+            </h2>
+            <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground">
+              Bring your own vision — a silhouette, a fabric, an heirloom motif — and our design
+              team will craft it from the first sketch to the final fitting, made-to-measure
+              entirely around you.
+            </p>
+
+            <div className="mt-9 space-y-6">
+              {[
+                {
+                  icon: PenTool,
+                  title: "Consult",
+                  copy: "Share your vision in a private appointment with our design team.",
+                },
+                {
+                  icon: Ruler,
+                  title: "Design & fit",
+                  copy: "We sketch your silhouette, fabric and embroidery, then take your measurements.",
+                },
+                {
+                  icon: Scissors,
+                  title: "Hand-craft",
+                  copy: "Master karigars embroider and tailor your piece in 4–6 weeks.",
+                },
+              ].map((step) => (
+                <div key={step.title} className="flex items-start gap-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center border border-primary/30 text-primary">
+                    <step.icon className="h-4 w-4" strokeWidth={1.4} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{step.title}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{step.copy}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              to="/shop"
+              className="mt-9 inline-flex h-12 items-center gap-2 bg-primary px-8 text-[12px] uppercase tracking-[0.28em] text-primary-foreground transition hover:bg-primary/90"
+            >
+              Start designing <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* EDITORIAL CTA */}
