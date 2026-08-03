@@ -135,7 +135,10 @@ const FALLBACK_HERO_SLIDES: HeroImage[][] = [
 
 function HeroCarousel({ slides }: { slides: HeroImage[][] }) {
   const heroSlides = slides.length > 0 ? slides : FALLBACK_HERO_SLIDES;
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: heroSlides.length > 1 });
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: heroSlides.length > 1,
+    duration: 38,
+  });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
