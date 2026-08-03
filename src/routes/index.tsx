@@ -17,9 +17,26 @@ function toHandle(title: string) {
   return title.toLowerCase().replace(/\s+/g, "-");
 }
 
+// Pinned by handle (rather than pulled live from the collection's sort order) so
+// re-ordering products in Shopify admin for merchandising doesn't reshuffle the hero.
+const HERO_PRODUCT_HANDLES = [
+  "pastel-pink-pishwas",
+  "diana",
+  "ivory-light",
+  "classic-red",
+  "hurrem-1",
+  "bridal-lehnga-9",
+  "deewan-1",
+  "libaas-e-khaas-1",
+  "noor-jaha-1",
+];
+
 const heroQuery = queryOptions({
-  queryKey: ["collection", "bridal-lehngas", "hero"],
-  queryFn: () => fetchCollectionProducts("bridal-lehngas", 24),
+  queryKey: ["hero-products", HERO_PRODUCT_HANDLES],
+  queryFn: async () => {
+    const products = await Promise.all(HERO_PRODUCT_HANDLES.map((h) => fetchProductByHandle(h)));
+    return products.filter((p): p is NonNullable<typeof p> => Boolean(p));
+  },
   staleTime: 60_000,
 });
 
@@ -161,7 +178,7 @@ function HeroCarousel({ slides }: { slides: HeroImage[][] }) {
   }, [emblaApi]);
 
   return (
-    <section className="relative h-[70vh] w-full overflow-hidden md:min-h-[88vh]">
+    <section className="relative min-h-[60vh] w-full overflow-hidden md:min-h-[88vh]">
       {/* Slides */}
       <div ref={emblaRef} className="absolute inset-0">
         <div className="flex h-full">
@@ -172,7 +189,11 @@ function HeroCarousel({ slides }: { slides: HeroImage[][] }) {
             >
               {slide.map((img, j) => (
                 <div key={j} className="relative h-full overflow-hidden bg-black">
-                  <img src={img.url} alt={img.alt} className="h-full w-full object-cover" />
+                  <img
+                    src={img.url}
+                    alt={img.alt}
+                    className="h-full w-full object-contain md:object-cover"
+                  />
                 </div>
               ))}
             </div>
@@ -183,7 +204,7 @@ function HeroCarousel({ slides }: { slides: HeroImage[][] }) {
       <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary" />
 
       {/* Content */}
-      <div className="relative mx-auto flex h-[70vh] max-w-7xl flex-col justify-end px-6 pb-24 pt-32 md:min-h-[88vh]">
+      <div className="relative mx-auto flex min-h-[60vh] max-w-7xl flex-col justify-end px-6 pb-24 pt-32 md:min-h-[88vh]">
         <p className="eyebrow text-background/80">Autumn / Winter Edit — Now Shipping</p>
         <h1 className="mt-4 max-w-3xl font-serif text-5xl font-medium leading-[1.05] text-background md:text-7xl">
           Bridal couture,<br />
@@ -239,7 +260,7 @@ function HomePage() {
   const heroSlides = useMemo(() => {
     type HeroCandidate = { url: string; altText: string | null; width?: number; height?: number };
     const images = heroProducts
-      .map((p) => p.node.images.edges[0]?.node)
+      .map((p) => p.images.edges[0]?.node)
       .filter((img): img is HeroCandidate => Boolean(img))
       .filter((img) => !img.width || !img.height || img.width / img.height <= HERO_MAX_ASPECT_RATIO)
       .slice(0, 9)
