@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useSuspenseQueries } from "@tanstack/react-query";
 import { queryOptions } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowRight, Scissors, Truck, Sparkles } from "lucide-react";
 import { fetchProducts, fetchCollectionProducts, type ShopifyProduct } from "@/lib/shopify";
 import { ProductCard } from "@/components/ProductCard";
+
+function toHandle(title: string) {
+  return title.toLowerCase().replace(/\s+/g, "-");
+}
 
 const productsQuery = queryOptions({
   queryKey: ["home-products"],
@@ -18,6 +22,20 @@ const saleQuery = queryOptions({
   queryFn: () => fetchCollectionProducts("ready-made-sale", 8),
   staleTime: 60_000,
 });
+
+const OCCASION_COLLECTIONS = [
+  { name: "Bridal Lehngas", tagline: "Statement heirlooms" },
+  { name: "Wedding Formal Dresses", tagline: "The occasion edit" },
+  { name: "Semi Formal", tagline: "Everyday luxe" },
+  { name: "Velvets", tagline: "Winter couture" },
+];
+
+const occasionCoverQuery = (name: string) =>
+  queryOptions({
+    queryKey: ["collection-cover", toHandle(name)],
+    queryFn: () => fetchCollectionProducts(toHandle(name), 1),
+    staleTime: 60_000,
+  });
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,6 +58,9 @@ export const Route = createFileRoute("/")({
     Promise.all([
       context.queryClient.ensureQueryData(productsQuery),
       context.queryClient.ensureQueryData(saleQuery),
+      ...OCCASION_COLLECTIONS.map((c) =>
+        context.queryClient.ensureQueryData(occasionCoverQuery(c.name)),
+      ),
     ]),
   component: HomePage,
 });
@@ -136,12 +157,13 @@ function HomePage() {
   const { data: saleProducts } = useSuspenseQuery(saleQuery);
   const featured = products.slice(0, 8);
 
-  const collections = [
-    { name: "Bridal Lehngas", tagline: "Statement heirlooms" },
-    { name: "Wedding Formal Dresses", tagline: "The occasion edit" },
-    { name: "Semi Formal", tagline: "Everyday luxe" },
-    { name: "Velvets", tagline: "Winter couture" },
-  ];
+  const occasionCovers = useSuspenseQueries({
+    queries: OCCASION_COLLECTIONS.map((c) => occasionCoverQuery(c.name)),
+  });
+  const collections = OCCASION_COLLECTIONS.map((c, i) => ({
+    ...c,
+    cover: occasionCovers[i].data[0]?.node.images.edges[0]?.node,
+  }));
 
   return (
     <div>
@@ -216,8 +238,6 @@ function HomePage() {
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {collections.map((c) => {
-            const cover = products.find((p) => p.node.productType === c.name)?.node.images.edges[0]?.node
-              ?? products[0]?.node.images.edges[0]?.node;
             return (
               <Link
                 key={c.name}
@@ -225,9 +245,9 @@ function HomePage() {
                 search={{ collection: c.name }}
                 className="group relative aspect-[3/4] overflow-hidden bg-secondary/40"
               >
-                {cover && (
+                {c.cover && (
                   <img
-                    src={cover.url}
+                    src={c.cover.url}
                     alt={c.name}
                     className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                   />
